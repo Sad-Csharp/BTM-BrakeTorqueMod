@@ -2,7 +2,7 @@ using System;
 using HarmonyLib;
 using KSL.API;
 
-namespace B_Torq;
+namespace B_Torq.Utilities;
 
 public static class Patcher
 {

@@ -1,36 +1,42 @@
-
-using System;
-using System.Collections.Generic;
 using GameOverlay;
-using HarmonyLib;
 using SyncMultiplayer;
+using UnityEngine;
 
 namespace B_Torq.types;
 
 public class Player
 {
-    public string Name { get; } = string.Empty;
-    public RaceCar RaceCar { get; }
-    public bool IsLocal { get; }
-    public int CarId { get; }
-    public int NetworkID { get; } = -1;
-    public ulong SteamID { get; }
+    public string Username { get; set; }
+    public string SteamUsername { get; private set; }
+    public PlayerId Id { get; set; }
+    public NetworkPlayer NetworkPlayer { get; set; }
+    public float BrakeTorque { get; set; }
+    public Texture2D Avatar { get; private set; } = GameManager.instance.defaultAvatar;
 
-    public Player(RaceCar car)
+    public Player(NetworkPlayer networkPlayer)
     {
-        RaceCar = car;
-        IsLocal = !car.isNetworkCar;
-        if (IsLocal)
+        NetworkPlayer = networkPlayer;
+        Username = networkPlayer.FilteredNickName;
+        Id = networkPlayer.PlayerId;
+        if (networkPlayer.userCar && networkPlayer.userCar.carX)
         {
-            Name = car.networkPlayer.FilteredNickName;
-            SteamID = car.networkPlayer.PlayerId.accountId;
+            BrakeTorque = networkPlayer.userCar.carX.brakeTorque;
         }
         else
         {
-            Name = RaceCar.networkPlayer.FilteredNickName;
-            NetworkID = RaceCar.networkPlayer.NetworkID;
-            SteamID = RaceCar.networkPlayer.PlayerId.accountId;
+            // We also adjust this after their car loads in OnCarLoaded Harmony patch
+            BrakeTorque = 0; // or some other default value
         }
-        CarId = RaceCar.carId;
+        
+        if (Id.platform == UserPlatform.Id.Steam)
+        {
+            Overlay.instance.RequestUserAvatarAndName(Id, GetUsernameAndAvatar, AvatarSize.Large);
+        }
+    }
+    
+    private void GetUsernameAndAvatar(PlayerId id, string username, Texture2D avatar)
+    {
+        SteamUsername = username;
+        Avatar = avatar;
     }
 }
