@@ -1,8 +1,5 @@
-using System;
 using System.Linq;
 using System.Reflection;
-using B_Torq.types;
-using SyncMultiplayer;
 using UnityEngine;
 
 namespace B_Torq.Utilities;
@@ -47,10 +44,5 @@ public static class Utils
         }
         
         return false;
-    }
-
-    public static NetworkPlayer ToBool(Player player)
-    {
-        return (player != null) ? player.NetworkPlayer : null;
     }
 }

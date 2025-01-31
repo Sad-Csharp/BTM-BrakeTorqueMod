@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using B_Torq.types;
 using B_Torq.Utilities;
@@ -6,6 +7,7 @@ using HarmonyLib;
 using KSL.API;
 using SyncMultiplayer;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace B_Torq;
 
@@ -26,6 +28,17 @@ public class BrakeTorque : BaseMod
         Utilities.Utils.LoadSkinOnStart();
         Patcher.Init();
         Patcher.TryPatch(typeof(BrakeTorque));
+        Config.Instance.TryLoadConfig();
+        SceneManager.sceneLoaded += OnSceneLoad;
+    }
+
+    private static void OnSceneLoad(Scene scene, LoadSceneMode mode)
+    {
+        if (States.mainCurrent is not GarageGUIState) 
+            return;
+        
+        Config.Instance.TryLoadConfig();
+        Config.Instance.TryGetSavedBrakeTorque(LocalPlayerCar);
     }
 
     private void Update()
@@ -73,18 +86,19 @@ public class BrakeTorque : BaseMod
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("-10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
         {
-            localPlayer.carX.brakeTorque -= 10;
+            localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque - 10, 100, 10000);
         }
         
-        if (Utilities.Utils.HorizontalSlider(ref brakeTorque, 100, 10000, 10))
+        if (Utilities.Utils.HorizontalSlider(ref brakeTorque, 100, 10000, 100, GUILayout.MinHeight(15)))
         {
             localPlayer.carX.brakeTorque = brakeTorque;
-            Config.Instance.AddSavedBrakeTorque(localPlayer.carId, brakeTorque);
+            Config.Instance.AddBrakeTorque(localPlayer, brakeTorque);
+            Config.Instance.Save();
         }
 
         if (GUILayout.Button("+10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
         {
-            localPlayer.carX.brakeTorque += 10;
+            localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque + 10, 100, 10000);
         }
         GUILayout.EndHorizontal();
         
@@ -141,7 +155,12 @@ public class BrakeTorque : BaseMod
         Kino.UI.Label("If you find any bugs or have any suggestions, please let me know!");
         Kino.UI.Label("Discord: Sad_User");
     }
-    
+
+    private void OnApplicationQuit()
+    {
+        Config.Instance.Save();
+    }
+
     private void ToggleWindow()
     {
         isOpen_ = !isOpen_;
@@ -158,10 +177,17 @@ public class BrakeTorque : BaseMod
 
         foreach (var player in Players.ToList())
         {
+            if (__instance.isLocalPlayer)
+                continue;
+            
             if (player.Id.accountId == __instance.networkPlayer.PlayerId.accountId)
                 player.BrakeTorque = __instance.carX.brakeTorque;
             else
                 Players.Remove(player);
         }
+
+        if (!__instance.isLocalPlayer)
+            return;
+        Config.Instance.TryGetSavedBrakeTorque(__instance);
     }
 }

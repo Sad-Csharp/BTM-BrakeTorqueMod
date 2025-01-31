@@ -6,9 +6,9 @@ namespace B_Torq.types;
 
 public class Player
 {
-    public string Username { get; set; }
+    public string Username { get; }
     public string SteamUsername { get; private set; }
-    public PlayerId Id { get; set; }
+    public PlayerId Id { get; }
     public NetworkPlayer NetworkPlayer { get; set; }
     public float BrakeTorque { get; set; }
     public Texture2D Avatar { get; private set; } = GameManager.instance.defaultAvatar;
@@ -25,7 +25,9 @@ public class Player
         else
         {
             // We also adjust this after their car loads in OnCarLoaded Harmony patch
-            BrakeTorque = 0; // or some other default value
+            // If their car hasn't loaded yet, we just set it to 0
+            // as a fallback
+            BrakeTorque = 0;
         }
         
         if (Id.platform == UserPlatform.Id.Steam)

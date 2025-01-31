@@ -1,49 +1,62 @@
 using System.Collections.Generic;
 using System.IO;
 using KSL.API;
-using Newtonsoft.Json;
 
 namespace B_Torq.Utilities;
 
 public class Config
 {
-    public static Config Instance { get; }
-
+    public static Config Instance { get; private set; }
+    public Dictionary<int, float> SavedCars { get; } = new();
     private static readonly string ConfigPath = Path.Combine(Kino.Paths.Config, "BTM.json");
-    
+
     static Config()
+    {
+        Instance = new Config();
+    }
+    
+    public void TryLoadConfig()
     {
         if (!File.Exists(ConfigPath))
         {
             Instance = new Config();
             Instance.Save();
-            Kino.Log.Warning("[BTM]: Config file not found, creating new one.");
-            return;
+            Kino.Log.Error("Config file not found, creating new one.");
         }
-        
-        Instance = File.ReadAllText(ConfigPath).FromJson<Config>();
+        else
+        {
+            Instance = File.ReadAllText(ConfigPath).FromJson<Config>();
+            Kino.Log.Info("Config file loaded.");
+        }
     }
 
     public void Save()
     {
         File.WriteAllText(ConfigPath, this.ToJson());
+        Kino.Log.Info("Config file saved.");
     }
-    
-    public void AddSavedBrakeTorque(int carId, float brakeTorque)
+
+    public void AddBrakeTorque(RaceCar car, float torque)
     {
-        SavedCars[carId] = brakeTorque;
-    }
-    
-    public void RemoveSavedBrakeTorque(int carId)
-    {
-        if (SavedCars.ContainsKey(carId))
-            SavedCars.Remove(carId);
+        if (SavedCars.ContainsKey(car.carId))
+            SavedCars[car.carId] = torque;
         else
         {
-            Kino.Log.Error($"Car {carId} not found in saved brake torques.");
+            SavedCars.Add(car.carId, torque);
+            Save();
         }
     }
     
-    [JsonIgnore]
-    public Dictionary<int, float> SavedCars { get; set; }
+    public void TryGetSavedBrakeTorque(RaceCar car)
+    {
+        if (SavedCars.TryGetValue(car.carId, out float savedBrakeTorque))
+            car.carX.brakeTorque = savedBrakeTorque;
+        else
+        {
+            Kino.Log.Error($"Car {car.carId} not found in saved brake torques.");
+            SavedCars.Add(car.carId, car.carX.brakeTorque);
+            Save();
+            Kino.Log.Info($"Saved brake torque for car {car.carId}.");
+        }
+    }
 }
