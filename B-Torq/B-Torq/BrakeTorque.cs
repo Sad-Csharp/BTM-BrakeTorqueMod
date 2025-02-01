@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using B_Torq.types;
 using B_Torq.Utilities;
 using HarmonyLib;
@@ -37,8 +37,11 @@ public class BrakeTorque : BaseMod
         if (States.mainCurrent is not GarageGUIState) 
             return;
         
-        Config.Instance.TryLoadConfig();
-        Config.Instance.TryGetSavedBrakeTorque(LocalPlayerCar);
+        var car = GameObject.Find("CarPositionMarker").GetComponentInChildren<RaceCar>();
+        if (car == null)
+            return;
+        
+        Config.Instance.TryGetSavedBrakeTorque(car);
     }
 
     private void Update()
@@ -78,7 +81,11 @@ public class BrakeTorque : BaseMod
             return;
         }
 
-        // TODO: Add 2 buttons 1 on each end of the slider to adjust the brake torque by 1 or 10 undecided
+        if (GUILayout.Button("Debug Info"))
+        {
+            Debug.Log("Item value: " + Utilities.Utils.TryGetDynoParamsItemView().item.value);
+        }
+        
         RaceCar localPlayer = LocalPlayerCar;
         float brakeTorque = LocalPlayerCar.carX.brakeTorque;
         GUILayout.Label("Torque range: 100-10,000");
@@ -91,6 +98,15 @@ public class BrakeTorque : BaseMod
         
         if (Utilities.Utils.HorizontalSlider(ref brakeTorque, 100, 10000, 100, GUILayout.MinHeight(15)))
         {
+            //if (Utilities.Utils.TryGetDynoParamsItemView())
+            //{
+            //    Utilities.Utils.TryGetDynoParamsItemView().item.value = Utilities.Utils.ConvertSliderValueToTorque(brakeTorque);
+            //}
+            //else
+            //{
+            //    Debug.LogError("DynoParamsItemView not found!");
+            //}
+            
             localPlayer.carX.brakeTorque = brakeTorque;
             Config.Instance.AddBrakeTorque(localPlayer, brakeTorque);
             Config.Instance.Save();
@@ -104,7 +120,7 @@ public class BrakeTorque : BaseMod
         
         if (game == null)
         {
-            GUILayout.Label("<color=red>No game found!</color>");
+            GUILayout.Label("<color=red>No multiplayer game found!</color>");
             GUILayout.Label("<color=red>Player list will not populate!</color>");
             GUILayout.Label("<color=red>You must be in a multiplayer lobby!</color>");
             GUI.DragWindow();
@@ -113,7 +129,10 @@ public class BrakeTorque : BaseMod
         
         // Check if we are in a multiplayer lobby, if not do not show the player list
         if (States.mainCurrent is not SyncNetFreerideRaceModeState)
+        {
+            GUI.DragWindow();
             return;
+        }
         
         // Player list display
         GUILayout.Label($"Players: ({game.Players.Count}/16)");
@@ -152,7 +171,7 @@ public class BrakeTorque : BaseMod
     {
         Kino.UI.Label("Brought back by request!");
         Kino.UI.Label("A basic mod to adjust the brake torque of your car, below the games 1,000 limit!");
-        Kino.UI.Label("If you find any bugs or have any suggestions, please let me know!");
+        Kino.UI.Label("If you find any bugs or have any suggestions, please let me know.");
         Kino.UI.Label("Discord: Sad_User");
     }
 

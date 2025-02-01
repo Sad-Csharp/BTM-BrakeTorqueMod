@@ -6,6 +6,9 @@ namespace B_Torq.Utilities;
 
 public static class Utils
 {
+    private static GameObject obj_;
+    private static DynoParamsItemView dynoParamsItemView_;
+    
     private static byte[] LoadFromMemory(string resourceName)
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -44,5 +47,37 @@ public static class Utils
         }
         
         return false;
+    }
+    
+    public static float ConvertSliderValueToTorque(float sliderValue)
+    {
+        sliderValue = Mathf.Clamp01(sliderValue);
+        return 100f + (10000f - 100f) * sliderValue;
+    }
+    
+    public static DynoParamsItemView TryGetDynoParamsItemView()
+    {
+        if (dynoParamsItemView_ != null)
+            return dynoParamsItemView_;
+
+        if (obj_ == null)
+        {
+            obj_ = GameObject.Find("KeepAlive(Clone)/UGUI/Root/Contexts/UIDynostand/BrakesContainer/BottomMain/BrakesParamsList/Viewport/VirtualContent/UIDynoParamsItem");
+        
+            if (obj_ == null)
+            {
+                Debug.LogError("UIDynoParamsItem not found!");
+                return null;
+            }
+        }
+
+        dynoParamsItemView_ = obj_.GetComponent<DynoParamsItemView>();
+
+        if (dynoParamsItemView_ == null)
+        {
+            Debug.LogError("DynoParamsItemView component not found on UIDynoParamsItem!");
+        }
+
+        return dynoParamsItemView_;
     }
 }
