@@ -7,8 +7,10 @@ namespace B_Torq.Utilities;
 public class Config
 {
     public static Config Instance { get; private set; }
-    public Dictionary<int, float> SavedCars { get; } = new();
     private static readonly string ConfigPath = Path.Combine(Kino.Paths.Config, "BTM.json");
+    public Dictionary<int, float> SavedCars { get; } = new();
+    public bool IsConfigLoadable = true;
+    public bool IsModEnabled = true;
 
     static Config()
     {
@@ -49,6 +51,12 @@ public class Config
     
     public void TryGetSavedBrakeTorque(RaceCar car)
     {
+        if (!IsConfigLoadable)
+        {
+            Kino.Log.Info("BTM config is disabled. Please enable it in the settings.");
+            return;
+        }
+        
         if (SavedCars.TryGetValue(car.carId, out float savedBrakeTorque))
             car.carX.brakeTorque = savedBrakeTorque;
         else

@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using B_Torq.types;
 using B_Torq.Utilities;
 using HarmonyLib;
 using KSL.API;
 using SyncMultiplayer;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace B_Torq;
 
@@ -18,6 +16,9 @@ public class BrakeTorque : BaseMod
     private Rect windowRect_ = new(10, 10, 350, 350);
     private Vector2 scrollPosition_ = Vector2.zero;
     private bool isOpen_;
+    private static float cachedBrakeTorque_;
+    private bool prevModEnabled = Config.Instance.IsModEnabled;
+    private bool prevConfigLoadable = Config.Instance.IsConfigLoadable;
     public static GUISkin Skin { get; set; }
     private static RaceCar LocalPlayerCar => !PlayerCarControl.instance ? GameObject.Find("CarPositionMarker").GetComponentInChildren<RaceCar>() : PlayerCarControl.instance.car;
     
@@ -29,19 +30,6 @@ public class BrakeTorque : BaseMod
         Patcher.Init();
         Patcher.TryPatch(typeof(BrakeTorque));
         Config.Instance.TryLoadConfig();
-        SceneManager.sceneLoaded += OnSceneLoad;
-    }
-
-    private static void OnSceneLoad(Scene scene, LoadSceneMode mode)
-    {
-        if (States.mainCurrent is not GarageGUIState) 
-            return;
-        
-        var car = GameObject.Find("CarPositionMarker").GetComponentInChildren<RaceCar>();
-        if (car == null)
-            return;
-        
-        Config.Instance.TryGetSavedBrakeTorque(car);
     }
 
     private void Update()
@@ -71,65 +59,76 @@ public class BrakeTorque : BaseMod
 
     private void BrakeTorqueWindow(int windowID)
     {
-        NetworkGame game = NetworkController.InstanceGame;
+        bool modEnabled = GUILayout.Toggle(Config.Instance.IsModEnabled, "Enable-Disable BTM");
+        if (modEnabled != prevModEnabled)
+        {
+            Config.Instance.IsModEnabled = modEnabled;
+            
+            if (!modEnabled)
+                LocalPlayerCar.carX.brakeTorque = cachedBrakeTorque_;
+        }
+        prevModEnabled = modEnabled;
+        
+        bool configLoadable = GUILayout.Toggle(Config.Instance.IsConfigLoadable, "Allow loading of saved torque values?");
+        if (configLoadable != prevConfigLoadable)
+        {
+            Config.Instance.IsConfigLoadable = configLoadable;
+        }
+        if (!Config.Instance.IsConfigLoadable)
+            GUILayout.Label("<color=red>BTM config is disabled. BTM will not load torque values!</color>");
+        prevConfigLoadable = configLoadable;
         
         if (!LocalPlayerCar)
         {
             GUILayout.Label("<color=red>No local player found!</color>");
-            GUILayout.Label("<color=red>Join a multiplayer lobby or single player game!</color>");
             GUI.DragWindow();
             return;
         }
-
-        if (GUILayout.Button("Debug Info"))
-        {
-            Debug.Log("Item value: " + Utilities.Utils.TryGetDynoParamsItemView().item.value);
-        }
         
-        RaceCar localPlayer = LocalPlayerCar;
-        float brakeTorque = LocalPlayerCar.carX.brakeTorque;
-        GUILayout.Label("Torque range: 100-10,000");
-        GUILayout.Label($"Current Brake Torque:  {brakeTorque:F0}");
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("-10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
-        {
-            localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque - 10, 100, 10000);
-        }
+        NetworkGame game = NetworkController.InstanceGame;
         
-        if (Utilities.Utils.HorizontalSlider(ref brakeTorque, 100, 10000, 100, GUILayout.MinHeight(15)))
+		// Check if we are in a multiplayer lobby, if not do not show anything but a label and return
+        if (States.mainCurrent is not SyncNetFreerideRaceModeState)
         {
-            //if (Utilities.Utils.TryGetDynoParamsItemView())
-            //{
-            //    Utilities.Utils.TryGetDynoParamsItemView().item.value = Utilities.Utils.ConvertSliderValueToTorque(brakeTorque);
-            //}
-            //else
-            //{
-            //    Debug.LogError("DynoParamsItemView not found!");
-            //}
-            
-            localPlayer.carX.brakeTorque = brakeTorque;
-            Config.Instance.AddBrakeTorque(localPlayer, brakeTorque);
-            Config.Instance.Save();
+            GUI.DragWindow();
+			GUILayout.Label("<color=red>Join a multiplayer lobby!</color>");
+            return;
         }
 
-        if (GUILayout.Button("+10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
+        if (Config.Instance.IsModEnabled)
         {
-            localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque + 10, 100, 10000);
+            RaceCar localPlayer = LocalPlayerCar;
+            float brakeTorque = LocalPlayerCar.carX.brakeTorque;
+            GUILayout.Label("Torque range: 100-10,000");
+            GUILayout.Label($"Current Brake Torque:  {brakeTorque:F0}");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("-10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
+            {
+                localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque - 10, 100, 10000);
+            }
+        
+            if (Utilities.Utils.HorizontalSlider(ref brakeTorque, 100, 10000, 100, GUILayout.Height(40)))
+            {
+                localPlayer.carX.brakeTorque = brakeTorque;
+                Config.Instance.AddBrakeTorque(localPlayer, brakeTorque);
+            }
+
+            if (GUILayout.Button("+10", GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false)))
+            {
+                localPlayer.carX.brakeTorque = Mathf.Clamp(localPlayer.carX.brakeTorque + 10, 100, 10000);
+            }
+            GUILayout.EndHorizontal();
         }
-        GUILayout.EndHorizontal();
+        else
+        {
+            GUILayout.Label("<color=red>BTM is disabled!</color>");
+        }
         
         if (game == null)
         {
             GUILayout.Label("<color=red>No multiplayer game found!</color>");
             GUILayout.Label("<color=red>Player list will not populate!</color>");
             GUILayout.Label("<color=red>You must be in a multiplayer lobby!</color>");
-            GUI.DragWindow();
-            return;
-        }
-        
-        // Check if we are in a multiplayer lobby, if not do not show the player list
-        if (States.mainCurrent is not SyncNetFreerideRaceModeState)
-        {
             GUI.DragWindow();
             return;
         }
@@ -207,6 +206,7 @@ public class BrakeTorque : BaseMod
 
         if (!__instance.isLocalPlayer)
             return;
+        cachedBrakeTorque_ = __instance.carX.brakeTorque;
         Config.Instance.TryGetSavedBrakeTorque(__instance);
     }
 }
