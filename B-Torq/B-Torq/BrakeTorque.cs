@@ -39,9 +39,24 @@ public class BrakeTorque : BaseMod
         if (game == null)
             return;
         
-        foreach (var player in Players.ToList().Where(player => game.Players.All(x => x.PlayerId.accountId != player.Id.accountId)))
+        foreach (Player player in Players.ToList().Where(player => game.Players.All(x => x.PlayerId.accountId != player.Id.accountId)))
         {
+            if (player.NetworkPlayer.isNetworkCarLoading)
+                continue;
+            
             Players.Remove(player);
+        }
+        
+        foreach (Player player in Players.Where(player => game.Players.Any(x => x.PlayerId.accountId == player.Id.accountId)))
+        {
+            if (player.NetworkPlayer.isNetworkCarLoading)
+                continue;
+
+            var matchingGamePlayer = game.Players.FirstOrDefault(x => x.PlayerId.accountId == player.Id.accountId);
+            if (matchingGamePlayer != null) // Ensure it's not null
+            {
+                player.BrakeTorque = matchingGamePlayer.userCar.carX.brakeTorque;
+            }
         }
     }
     
@@ -183,6 +198,8 @@ public class BrakeTorque : BaseMod
     {
         isOpen_ = !isOpen_;
     }
+    
+    // TODO: Apply updated btorq values in the player list instantly as its not updating for players immediately.
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RaceCar), "OnCarLoaded")]

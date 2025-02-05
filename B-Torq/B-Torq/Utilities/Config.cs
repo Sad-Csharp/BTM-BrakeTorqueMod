@@ -13,10 +13,10 @@ public class Config
     public bool IsModEnabled = true;
 
     static Config()
-    {
-        Instance = new Config();
+    { 
+            Instance = new Config();
     }
-    
+        
     public void TryLoadConfig()
     {
         if (!File.Exists(ConfigPath))
