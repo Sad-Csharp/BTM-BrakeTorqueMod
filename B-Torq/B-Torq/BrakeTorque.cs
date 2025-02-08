@@ -30,6 +30,12 @@ public class BrakeTorque : BaseMod
         Patcher.Init();
         Patcher.TryPatch(typeof(BrakeTorque));
         Config.Instance.TryLoadConfig();
+        
+        Sync.Init();
+        Sync.OnBrakeTorqueDataReceived -= OnBrakeTorqueDataReceived;
+        Sync.OnBrakeTorqueDataReceived += OnBrakeTorqueDataReceived;
+        Sync.OnBrakeTorqueRequestReceived -= OnBrakeTorqueRequestReceived;
+        Sync.OnBrakeTorqueRequestReceived += OnBrakeTorqueRequestReceived;
     }
 
     private void Update()
@@ -39,23 +45,32 @@ public class BrakeTorque : BaseMod
         if (game == null)
             return;
         
-        foreach (Player player in Players.ToList().Where(player => game.Players.All(x => x.PlayerId.accountId != player.Id.accountId)))
-        {
-            if (player.NetworkPlayer.isNetworkCarLoading)
-                continue;
-            
-            Players.Remove(player);
-        }
+        //foreach (Player player in Players.ToList().Where(player => game.Players.All(x => x.PlayerId.accountId != player.Id.accountId)))
+        //{
+        //    if (player.NetworkPlayer.isNetworkCarLoading)
+        //        continue;
+        //    
+        //    Players.Remove(player);
+        //}
         
-        foreach (Player player in Players.Where(player => game.Players.Any(x => x.PlayerId.accountId == player.Id.accountId)))
+        for (int i = Players.Count - 1; i >= 0; i--)
         {
-            if (player.NetworkPlayer.isNetworkCarLoading)
-                continue;
-
-            var matchingGamePlayer = game.Players.FirstOrDefault(x => x.PlayerId.accountId == player.Id.accountId);
-            if (matchingGamePlayer != null) // Ensure it's not null
+            Player player = Players[i];
+            bool found = false;
+            foreach (var t in game.Players)
             {
-                player.BrakeTorque = matchingGamePlayer.userCar.carX.brakeTorque;
+                if (t.PlayerId.accountId == player.Id.accountId)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                if (player.NetworkPlayer.isNetworkCarLoading)
+                    continue;
+        
+                Players.RemoveAt(i);
             }
         }
     }
@@ -155,7 +170,16 @@ public class BrakeTorque : BaseMod
         scrollPosition_ = GUILayout.BeginScrollView(scrollPosition_, GUILayout.Height(250));
         foreach (var networkPlayer in game.Players)
         {
-            var player = Players.FirstOrDefault(x => x.Id.accountId == networkPlayer.PlayerId.accountId);
+            Player player = null;
+            foreach (var p in Players)
+            {
+                if (p.Id.accountId == networkPlayer.PlayerId.accountId)
+                {
+                    player = p;
+                    break;
+                }
+            }
+            
             if (player == null)
             {
                 player = new Player(networkPlayer);
@@ -172,7 +196,7 @@ public class BrakeTorque : BaseMod
             using (new GUILayout.HorizontalScope("box"))
             {
                 GUILayout.Label(player.Avatar, GUI.skin.label, GUILayout.Width(35), GUILayout.Height(35));
-                GUILayout.Label($"{player.Username}'s Brake Torque: {player.BrakeTorque:F0}");
+                GUILayout.Label($"{player.Username}'s Brake Torque: {player.NetworkPlayer.userCar.carX.brakeTorque:F0}");
             }
         }
         GUILayout.EndScrollView();
@@ -181,6 +205,30 @@ public class BrakeTorque : BaseMod
         GUI.DragWindow();
     }
 
+    #region Methods
+
+    private void OnBrakeTorqueDataReceived(ulong steamId, float brakeTorque)
+    {
+        NetworkGame game = NetworkController.InstanceGame;
+
+        if (game == null)
+            return;
+        
+        foreach (var player in Players)
+        {
+            if (player.Id.accountId == steamId)
+            {
+                player.NetworkPlayer.userCar.carX.brakeTorque = brakeTorque;
+                break;
+            }
+        }
+    }
+
+    private void OnBrakeTorqueRequestReceived(ulong steamId)
+    {
+        
+    }
+    
     public override void OnAdditionalAboutUIDraw()
     {
         Kino.UI.Label("Brought back by request!");
@@ -199,31 +247,20 @@ public class BrakeTorque : BaseMod
         isOpen_ = !isOpen_;
     }
     
-    // TODO: Apply updated btorq values in the player list instantly as its not updating for players immediately.
-    
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RaceCar), "OnCarLoaded")]
     private static void RaceCar_OnCarLoaded_Postfix(RaceCar __instance)
     {
         if (!__instance)
-        {
             return;
-        }
-
-        foreach (var player in Players.ToList())
-        {
-            if (__instance.isLocalPlayer)
-                continue;
-            
-            if (player.Id.accountId == __instance.networkPlayer.PlayerId.accountId)
-                player.BrakeTorque = __instance.carX.brakeTorque;
-            else
-                Players.Remove(player);
-        }
 
         if (!__instance.isLocalPlayer)
             return;
+        
         cachedBrakeTorque_ = __instance.carX.brakeTorque;
         Config.Instance.TryGetSavedBrakeTorque(__instance);
     }
+
+    #endregion
+    
 }
