@@ -29,13 +29,13 @@ public static class Sync
             return;
         }
         
-        if (!Kino.Sync.SetCallback(dataPacketId_, Sync.OnDataPacketReceived))
+        if (!Kino.Sync.SetCallback(dataPacketId_, OnDataPacketReceived))
         {
             Kino.Log.Error("Unable to register drivetrain data callback");
             return;
         }
         
-        if (!Kino.Sync.SetCallback(requestPacketId_, Sync.OnRequestPacketReceived))
+        if (!Kino.Sync.SetCallback(requestPacketId_, OnRequestPacketReceived))
         {
             Kino.Log.Error("Unable to register drivetrain request callback");
             return;
