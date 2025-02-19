@@ -8,6 +8,7 @@ public static class Sync
 {
     public static event Action<ulong, float> OnBrakeTorqueDataReceived;
     public static event Action<ulong> OnBrakeTorqueRequestReceived;
+    
     private static bool isAvailable_;
     private static ulong steamId_;
     private static int dataPacketId_;
@@ -45,7 +46,7 @@ public static class Sync
         {
             steamId_ = steamOverlay.player.id.accountId;
         }
-        Kino.Log.Info(string.Format("Synchronization initialized, SteamID: {0}", steamId_));
+        Kino.Log.Info($"Synchronization initialized, SteamID: {steamId_}");
     }
 
     public static void Send(float brakeTorque, int nwId = -1)

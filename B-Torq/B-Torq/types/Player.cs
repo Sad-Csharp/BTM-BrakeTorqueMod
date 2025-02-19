@@ -11,12 +11,14 @@ public class Player
     public PlayerId Id { get; }
     public NetworkPlayer NetworkPlayer { get; set; }
     public Texture2D Avatar { get; private set; } = GameManager.instance.defaultAvatar;
+    public float BrakeTorque { get; set; }
 
     public Player(NetworkPlayer networkPlayer)
     {
         NetworkPlayer = networkPlayer;
         Username = networkPlayer.FilteredNickName;
         Id = networkPlayer.PlayerId;
+        BrakeTorque = networkPlayer.userCar.carX.brakeTorque;
         
         if (Id.platform == UserPlatform.Id.Steam)
         {
