@@ -146,6 +146,9 @@ public class BrakeTorque : BaseMod
 
         foreach (NetworkPlayer networkPlayer in game.Players)
         {
+            if (networkPlayer == null) 
+                continue;
+
             Player player = Players.FirstOrDefault(x => x.Id.accountId == networkPlayer.PlayerId.accountId);
             if (player == null)
             {
@@ -156,13 +159,22 @@ public class BrakeTorque : BaseMod
             {
                 player.NetworkPlayer = networkPlayer;
             }
-                
+
+            if (player.NetworkPlayer == null) 
+                continue;
+
             if (player.NetworkPlayer.IsLocal) 
                 continue;
-                
+
+            if (string.IsNullOrEmpty(player.Username)) 
+                continue;
+
             using (new GUILayout.HorizontalScope("box"))
             {
-                GUILayout.Label(player.Avatar, GUI.skin.label, GUILayout.Width(35), GUILayout.Height(35));
+                if (player.Avatar != null)
+                {
+                    GUILayout.Label(player.Avatar, GUI.skin.label, GUILayout.Width(35), GUILayout.Height(35));
+                }
                 GUILayout.Label($"{player.Username}'s Brake Torque: {player.BrakeTorque:F0}");
             }
         }
@@ -188,6 +200,7 @@ public class BrakeTorque : BaseMod
             
             if (player.Id.accountId == steamId)
             {
+                Debug.Log("Setting brake torque for " + player.Username);
                 player.BrakeTorque = brakeTorque;
                 break;
             }
@@ -206,6 +219,7 @@ public class BrakeTorque : BaseMod
             
             if (player.Id.accountId == steamId)
             {
+                Debug.Log("Sending brake torque for " + player.Username);
                 Sync.Send(LocalPlayerCar.carX.brakeTorque, player.NetworkPlayer.NetworkID);
             }
         }

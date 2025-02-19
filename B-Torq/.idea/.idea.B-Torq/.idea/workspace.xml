@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="06fef8fa-7c6f-4c8e-b31c-67dfc55776bb" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/dictionaries/Justin.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/discord.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/B-Torq/BrakeTorque.cs" beforeDir="false" afterPath="$PROJECT_DIR$/B-Torq/BrakeTorque.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/B-Torq/Sync.cs" beforeDir="false" afterPath="$PROJECT_DIR$/B-Torq/Sync.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -44,6 +44,10 @@
     "RunOnceActivity.git.unshallow": "true",
     "com.codeium.enabled": "true",
     "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "discord-project",
     "vue.rearranger.settings.migration": "true"
@@ -72,7 +76,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1739987479111</updated>
-      <workItem from="1739987480572" duration="293000" />
+      <workItem from="1739987480572" duration="1619000" />
     </task>
     <servers />
   </component>
