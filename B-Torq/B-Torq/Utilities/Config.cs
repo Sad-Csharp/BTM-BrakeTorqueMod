@@ -8,8 +8,9 @@ public class Config
 {
     public static Config Instance { get; private set; }
     private static readonly string ConfigPath = Path.Combine(Kino.Paths.Config, "BTM.json");
+    
+    // must be public so json can save and load from it! It will break config if private
     public Dictionary<int, float> SavedCars { get; } = new();
-    public bool IsConfigLoadable = true;
     public bool IsModEnabled = true;
 
     static Config()
@@ -51,14 +52,20 @@ public class Config
     
     public void TryGetSavedBrakeTorque(RaceCar car)
     {
-        if (!IsConfigLoadable)
+        if (!IsModEnabled)
         {
-            Kino.Log.Info("BTM config is disabled. Please enable it in the settings.");
+            Kino.Log.Info("BTM is disabled. Please enable it.");
             return;
         }
-        
+
         if (SavedCars.TryGetValue(car.carId, out float savedBrakeTorque))
+        {
+            if (car == null)
+                return;
+            
             car.carX.brakeTorque = savedBrakeTorque;
+        }
+            
         else
         {
             Kino.Log.Error($"Car {car.carId} not found in saved brake torques.");

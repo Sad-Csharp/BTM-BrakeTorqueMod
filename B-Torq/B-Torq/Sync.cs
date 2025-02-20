@@ -58,6 +58,9 @@ public static class Sync
             return;
         }
 
+        if (States.mainCurrent is not SyncNetFreerideRaceModeState)
+            return;
+
         try
         {
             IPacket packet = Kino.Sync.CreatePacket(dataPacketId_);
@@ -79,6 +82,9 @@ public static class Sync
             Debug.Log("Request: Not available, skipping.");
             return;
         }
+        
+        if (States.mainCurrent is not SyncNetFreerideRaceModeState)
+            return;
 
         try
         {
@@ -120,8 +126,8 @@ public static class Sync
             Debug.Log("OnDataPacketReceived: Not available, skipping.");
             return;
         }
-
-        if (packet.Id != requestPacketId_)
+        
+        if (packet.Id != dataPacketId_)
         {
             Debug.Log($"Ignoring packet with id {packet.Id}, expected {requestPacketId_}.");
             return;
@@ -156,7 +162,7 @@ public static class Sync
             return;
         }
 
-        if (packet.Id != dataPacketId_)
+        if (packet.Id != requestPacketId_)
         {
             Debug.Log($"Ignoring packet with id {packet.Id}, expected {dataPacketId_}.");
             return;
