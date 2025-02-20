@@ -8,7 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.B-Torq/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/B-Torq/BrakeTorque.cs" beforeDir="false" afterPath="$PROJECT_DIR$/B-Torq/BrakeTorque.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/B-Torq/Sync.cs" beforeDir="false" afterPath="$PROJECT_DIR$/B-Torq/Sync.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/B-Torq/Utilities/Config.cs" beforeDir="false" afterPath="$PROJECT_DIR$/B-Torq/Utilities/Config.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,12 +23,12 @@
     &quot;assignee&quot;: &quot;Sad-Csharp&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Sad-Csharp/BTM-BrakeTorqueMod.git&quot;,
-    &quot;accountId&quot;: &quot;c8adfe1d-6e71-468a-ac95-97162dbe42bb&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Sad-Csharp/BTM-Source.git",
+    "accountId": "c8adfe1d-6e71-468a-ac95-97162dbe42bb"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 7
@@ -50,7 +49,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "settings.sync",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -79,6 +78,8 @@
       <updated>1739987479111</updated>
       <workItem from="1739987480572" duration="9924000" />
       <workItem from="1740004471219" duration="2912000" />
+      <workItem from="1740008787140" duration="3854000" />
+      <workItem from="1740012850100" duration="252000" />
     </task>
     <servers />
   </component>

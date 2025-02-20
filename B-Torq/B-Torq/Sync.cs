@@ -67,7 +67,6 @@ public static class Sync
             packet.WriteUInt64(steamId_);
             packet.WriteFloat(brakeTorque);
             SendInternal(packet, nwId);
-            Debug.Log($"Sent brake torque packet: steamId={steamId_}, brakeTorque={brakeTorque}, nwId={nwId}");
         }
         catch (Exception ex)
         {
@@ -91,7 +90,6 @@ public static class Sync
             IPacket packet = Kino.Sync.CreatePacket(requestPacketId_);
             packet.WriteUInt64(steamId_);
             SendInternal(packet, nwId);
-            Debug.Log($"Sent request packet: steamId={steamId_}, nwId={nwId}");
         }
         catch (Exception ex)
         {
@@ -103,14 +101,12 @@ public static class Sync
     {
         if (nwId == -1)
         {
-            Debug.Log("Sending packet to all players.");
             Kino.Sync.SendToAll(packet);
             return;
         }
 
         try
         {
-            Debug.Log($"Sending packet to player with nwId={nwId}.");
             Kino.Sync.SendTo(packet, (ulong)nwId);
         }
         catch (Exception ex)
@@ -129,7 +125,7 @@ public static class Sync
         
         if (packet.Id != dataPacketId_)
         {
-            Debug.Log($"Ignoring packet with id {packet.Id}, expected {requestPacketId_}.");
+            Debug.Log($"Ignoring packet with id {packet.Id}, expected {dataPacketId_}.");
             return;
         }
 
@@ -137,8 +133,6 @@ public static class Sync
         {
             ulong number = packet.ReadUInt64();
             float brakeTorque = packet.ReadFloat();
-            Debug.Log($"Received brake torque data: number={number}, brakeTorque={brakeTorque}");
-
             Action<ulong, float> onBrakeTorqueDataReceived = OnBrakeTorqueDataReceived;
             if (onBrakeTorqueDataReceived == null)
             {
@@ -164,15 +158,13 @@ public static class Sync
 
         if (packet.Id != requestPacketId_)
         {
-            Debug.Log($"Ignoring packet with id {packet.Id}, expected {dataPacketId_}.");
+            Debug.Log($"Ignoring packet with id {packet.Id}, expected {requestPacketId_}.");
             return;
         }
 
         try
         {
             ulong number = packet.ReadUInt64();
-            Debug.Log($"Received brake torque request: number={number}");
-
             Action<ulong> onBrakeTorqueRequestReceived = OnBrakeTorqueRequestReceived;
             if (onBrakeTorqueRequestReceived == null)
             {

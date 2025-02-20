@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace B_Torq;
 
-[KSLMeta("BTM", "1.0.0", "Mizar")]
+[KSLMeta("BTM", "1.1.0", "Mizar")]
 public class BrakeTorque : BaseMod
 {
     private static List<Player> Players { get; } = [];
