@@ -2,6 +2,7 @@
 using System.Linq;
 using B_Torq.types;
 using B_Torq.Utilities;
+using CarX;
 using HarmonyLib;
 using KSL.API;
 using SyncMultiplayer;
@@ -120,6 +121,14 @@ public class BrakeTorque : BaseMod
                 Sync.Send(localPlayer.carX.brakeTorque);
             }
             GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Test BTM Value Adjustment"))
+            {
+                CarDesc carDesc = null;
+                LocalPlayerCar.carX.GetCarDesc(ref carDesc);
+                carDesc.brakes.maxTorque = 5500f;
+                LocalPlayerCar.carX.SetCarDesc(carDesc, true);
+            }
         }
         else
         {
